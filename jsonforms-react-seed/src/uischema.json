@@ -1,0 +1,25 @@
+{
+    "type": "VerticalLayout",
+    "elements": [
+        {
+            "type": "Control",
+            "scope": "#/properties/username",
+            "label": "Username"
+        },
+        {
+            "type": "Control",
+            "scope": "#/properties/email",
+            "label": "Email"
+        },
+        {
+            "type": "Control",
+            "scope": "#/properties/confirmation password",
+            "label": "Confirmation Password"
+        },
+        {
+            "type": "Control",
+            "scope": "#/properties/password",
+            "label": "Password"
+        }
+    ]
+}
