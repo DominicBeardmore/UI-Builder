@@ -1,0 +1,6 @@
+{
+    "num_of_fields": "How many string fields are there in this request?",
+    "component_type": "What kind of component do they want?",
+    "list_labels": "List the labels for each of fields in the prompt?",
+    "orientation": "How do they want the form laid out? Vertically or Horizontally?"
+}

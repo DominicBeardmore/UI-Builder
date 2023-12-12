@@ -1,115 +1,66 @@
-import dataclasses
-from transformers import pipeline
-from pydantic.dataclasses import dataclass
 from pydantic import RootModel
-from rich import print
-import json
+from models import Layout, Ele, StrEle, Schema
+from file_handler import file_handler
+from Interrogate import Interrogate
 
+class transform:
+    schema_path="./jsonforms-react-seed/src/schema.json"
+    ui_schema_path="./jsonforms-react-seed/src/uischema.json"
+    questions_path="./NLP/questions.json"
 
-schemaPath="./jsonforms-react-seed/src/schema.json"
-uiSchemaPath="./jsonforms-react-seed/src/uischema.json"
-model_name = "deepset/tinyroberta-squad2"
-context = "Create me a form component with four text fields, with labels of Username and Email and Password and Confirmation Password. Arrange them in a vertical layout."
-nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
-properties = {}
+    context = "Create me a form component with three text fields, with labels of Username and Email and Password. Arrange them in a vertical layout."
+    properties = {}
+    questions = {}
 
-@dataclass
-class StrEle:
-    type: str ="string"
-    minLength: int = 1
+    def __init__(self):
+        self.interrogate = Interrogate(context=self.context)
+        self.file_handler = file_handler(
+            questions_path=self.questions_path,
+            schema_path=self.schema_path,
+            ui_schema_path=self.ui_schema_path
+        )
+        self.questions = self.file_handler.read_questions()
+        self.compute()
 
-@dataclass
-class Schema:
-    type: str = "object"
-    properties: dict[str, StrEle] = None
+    def create_layout(self, numOfFields, componentType, labels, layout):
+        layoutObj = Layout("", [])
+        layoutObj.type = self.interrogate.get_orientation(layout)
 
-@dataclass
-class Ele:
-    type: str = "x"
-    scope: str = "x"
-    label: str = "x"
+        elements = []
+        for index, value in enumerate(labels):
+            label = f"{value}" 
+            ele = Ele()
+            ele.label = label
+            ele.type = "Control"
+            ele.scope = "#/properties/" + label.lower()
+            elements.append(ele)
 
-@dataclass
-class Layout:
-    type: str = "VerticalLayout"
-    elements: list[Ele] = dataclasses.field(default_factory=lambda: [0])
+        layoutObj.elements = elements
+        return layoutObj
 
-def interograte(question, context):
-    QA_input = {
-        'question': question,
-        'context': context
-    }
-    res = nlp(QA_input)
-    return res
+    def create_properties_array(self, labels):
+        properties = {}
+        for index, value in enumerate(labels):
+            label = f"{value}"  # Dynamic label based on index
+            properties[label.lower()] = StrEle()
 
-def numberOfFields():
-    question = "How many string fields are there in this request?"
-    return interograte(question, context)
+        return properties
 
-def typeOfComponent():
-    question = "What kind of component do they want?"
-    return interograte(question, context)
+    def generate_UI(self, numOfFields, componentType, labels, layout): 
+        labels = labels.split(' and ')
+        propertiesDict = self.create_properties_array(labels)
+        fieldsJSON = Schema(type="object", properties=propertiesDict)
+        uiJSON = self.create_layout(numOfFields, componentType, labels, layout)
 
-def fieldLabels():
-    question = "List the labels for each of fields in the prompt?"
-    return interograte(question, context)
+        self.file_handler.write_schema(RootModel[Schema](fieldsJSON).model_dump_json(indent=4), self.schema_path)
+        self.file_handler.write_schema(RootModel[Layout](uiJSON).model_dump_json(indent=4), self.ui_schema_path)
 
-def fieldLayout():
-    question = "How do they want the form laid out? Vertically or Horizontally?"
-    return interograte(question, context)
+    def compute(self):
+        number_of_fields = self.interrogate.query_context(self.questions["num_of_fields"])['answer']
+        component_type = self.interrogate.query_context(self.questions["component_type"])['answer']
+        orientation = self.interrogate.query_context(self.questions["orientation"])['answer']
+        labels = self.interrogate.query_context(self.questions["list_labels"])['answer']
 
-def getStrEle():
-    return StrEle(type="string", minLength=1)
+        self.generate_UI(number_of_fields, component_type, labels, orientation)
 
-def getOrientation(layout):
-    if layout == "vertical":
-        return "VerticalLayout"
-    else: 
-        return "HorizontalLayout"
-
-def createLayout(numOfFields, componentType, labels, layout):
-    layoutObj = Layout("", [])
-    layoutObj.type = getOrientation(layout)
-
-    elements = []
-    for index, value in enumerate(labels):
-        label = f"{value}" 
-        ele = Ele()
-        ele.label = label
-        ele.type = "Control"
-        ele.scope = "#/properties/" + label.lower()
-        elements.append(ele)
-
-    layoutObj.elements = elements
-    return layoutObj
-
-def createPropertiesArray(labels):
-    for index, value in enumerate(labels):
-        label = f"{value}"  # Dynamic label based on index
-        properties[label.lower()] = StrEle()
-
-    return properties
-
-def generateUI(numOfFields, componentType, labels, layout): 
-    labels = labels.split(' and ')
-    propertiesDict = createPropertiesArray(labels)
-    fieldsJSON = Schema(type="object", properties=propertiesDict)
-    uiJSON = createLayout(numOfFields, componentType, labels, layout)
-
-    writeToFile(RootModel[Schema](fieldsJSON).model_dump_json(indent=4), schemaPath)
-    writeToFile(RootModel[Layout](uiJSON).model_dump_json(indent=4), uiSchemaPath)
-
-def writeToFile(json, file):
-    f = open(file, "w")
-    f.write(json)
-    f.close()
-
-def compute():
-    numOfFields = numberOfFields()['answer']
-    componentType = typeOfComponent()['answer']
-    labels = fieldLabels()['answer']
-    layout = fieldLayout()['answer']
-
-    generateUI(numOfFields, componentType, labels, layout)
-
-compute()
+transform()

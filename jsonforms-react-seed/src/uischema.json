@@ -13,11 +13,6 @@
         },
         {
             "type": "Control",
-            "scope": "#/properties/confirmation password",
-            "label": "Confirmation Password"
-        },
-        {
-            "type": "Control",
             "scope": "#/properties/password",
             "label": "Password"
         }
