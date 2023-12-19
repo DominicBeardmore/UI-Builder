@@ -1,0 +1,16 @@
+{
+    "extractive": {
+        "text_field_labels": "What are the labels for each of the string fields",
+        "date_field_labels": "What are the labels for each of the date fields",
+        "boolean_field_labels": "What are the labels for each of the boolean fields",
+        "enum_field_labels": "What are the labels for each of the enum fields",
+        "integer_field_labels": "What are the labels for each of the integer fields",
+        "component_type": "What kind of component do they want?",
+        "all_labels": "What are the labels for all the text and date fields?",
+        "number_of_fields": "How many text and date fields are in this prompt?",
+        "orientation": "How do they want the form laid out? Vertically or Horizontally?"
+    },
+    "abstractive": {
+        
+    }
+}

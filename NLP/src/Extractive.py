@@ -1,10 +1,9 @@
 from transformers import pipeline
-from models import StringField
 
-class Interrogate:
+class Extractive:
     model_name = "deepset/tinyroberta-squad2"
     nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
-    questionsPath="./questions.json"
+    questionsPath="./questions/questions.json"
     
     def __init__(self, context, queries):
         self.context =  context
@@ -53,6 +52,3 @@ class Interrogate:
     def get_orientation(self):
         question = self.queries["orientation"]
         return self.query_context(question)
-    
-    def get_str_ele(self):
-        return StringField(type="string", minLength=1)

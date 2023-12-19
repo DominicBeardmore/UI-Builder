@@ -1,27 +1,31 @@
 from pydantic import RootModel
-from models import Layout, Ele, StringField, Schema, DateField, Labels, BooleanField, IntegerField, EnumField
 from file_handler import file_handler
-from Interrogate import Interrogate
+from models.JsonForms.Fields import StringField, DateField, BooleanField, EnumField, IntegerField
+from models.JsonForms.Schema import Schema
+from models.Intermediate.Labels import Labels
+from models.JsonForms.UiSchema import UiSchema, Ele
+from Extractive import Extractive
 from rich import print
 
 class transform:
     schema_path     = "./jsonforms-react-seed/src/schema.json"
     ui_schema_path  = "./jsonforms-react-seed/src/uischema.json"
-    questions_path  = "./NLP/questions.json"
+    questions_path  = "./NLP/src/questions/questions.json"
     # context         = "Create me a form component with four text fields, with labels of Username and Confirm Password and Password and Email Address. Arrange them in a vertical layout."
     # context         = "Create a form with three text fields labelled Username, Confirm Password and Password and a date field with the label Due Date. Arrange them in a vertical layout."
-    context = "Create a form with three string fields labelled Username, Password and Confirm Password. A date field with the label Date of Birth. A boolean field labelled Accept. Arrange them in a vertical layout."
     properties      = {}
     questions       = {}
 
-    def __init__(self):
+    def __init__(self, context):
         self.file_handler   = file_handler(
             questions_path  = self.questions_path,
             schema_path     = self.schema_path,
             ui_schema_path  = self.ui_schema_path
         )
-        self.questions      = self.file_handler.read_questions()
-        self.interrogate    = Interrogate(context=self.context, queries=self.questions)
+        self.context       = context
+        self.questions     = self.file_handler.read_questions()
+        self.extractive    = Extractive(context=self.context, queries=self.questions["extractive"])
+
         self.compute()
 
     def get_orientation(self, layout):
@@ -32,7 +36,7 @@ class transform:
         
     """Method for creating the layout schema"""
     def create_layout(self, labels, orientation):
-        layoutObj       = Layout("", [])
+        layoutObj       = UiSchema("", [])
         layoutObj.type  = self.get_orientation(orientation)
 
         elements = []
@@ -77,21 +81,21 @@ class transform:
         return properties
 
     def generate_UI(self, labels, orientation): 
-        prop = self.create_field_schema(labels)
+        prop            = self.create_field_schema(labels)
         fieldsJSON      = Schema(type="object", properties=prop)
         uiJSON          = self.create_layout(labels, orientation)
 
         self.file_handler.write_schema(RootModel[Schema](fieldsJSON).model_dump_json(indent=4), self.schema_path)
-        self.file_handler.write_schema(RootModel[Layout](uiJSON).model_dump_json(indent=4), self.ui_schema_path)
+        self.file_handler.write_schema(RootModel[UiSchema](uiJSON).model_dump_json(indent=4), self.ui_schema_path)
 
     def compute(self):
-        text_field_labels = self.interrogate.get_text_field_labels()
-        date_field_labels = self.interrogate.get_date_field_labels()
-        # enum_field_labels = self.interrogate.get_enum_field_labels()
-        boolean_field_labels = self.interrogate.get_boolean_field_labels()
-        # integer_field_labels = self.interrogate.get_integer_field_labels()
-        # get_all_labels    = self.interrogate.get_all_labels()
-        # number_of_fields  = self.interrogate.get_number_of_fields()
+        text_field_labels = self.extractive.get_text_field_labels()
+        date_field_labels = self.extractive.get_date_field_labels()
+        # enum_field_labels = self.extractive.get_enum_field_labels()
+        boolean_field_labels = self.extractive.get_boolean_field_labels()
+        # integer_field_labels = self.extractive.get_integer_field_labels()
+        # get_all_labels    = self.extractive.get_all_labels()
+        # number_of_fields  = self.extractive.get_number_of_fields()
         string_labels = self.splitList(text_field_labels)
         date_labels = self.splitList(date_field_labels)
         # enum_labels=self.splitList(enum_field_labels)
@@ -105,11 +109,17 @@ class transform:
             enum_labels=[],
             boolean_labels=boolean_labels
             )
-        orientation        = self.interrogate.get_orientation()
+        orientation        = self.extractive.get_orientation()
 
         # print(labels)
-        # component_type     = self.interrogate.query_context(self.questions["component_type"])['answer']
-        # labels             = self.interrogate.query_context(self.questions["list_labels"])['answer']
+        # component_type     = self.extractive.query_context(self.questions["component_type"])['answer']
+        # labels             = self.extractive.query_context(self.questions["list_labels"])['answer']
         self.generate_UI(labels, orientation=orientation)
 
-transform()
+def main():
+    user_input = input("Enter a string: ")
+
+    transform(user_input)
+
+if __name__ == "__main__":
+    main()
