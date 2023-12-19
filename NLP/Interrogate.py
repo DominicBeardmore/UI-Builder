@@ -1,13 +1,14 @@
 from transformers import pipeline
-from models import StrEle
+from models import StringField
 
 class Interrogate:
     model_name = "deepset/tinyroberta-squad2"
     nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
     questionsPath="./questions.json"
     
-    def __init__(self, context):
+    def __init__(self, context, queries):
         self.context =  context
+        self.queries = queries
 
     def query_context(self, question):
         QA_input = {
@@ -15,29 +16,43 @@ class Interrogate:
             'context': self.context
         }
         res = self.nlp(QA_input)
-        return res
+        return res['answer']
 
+    def get_text_field_labels(self):
+        question = self.queries["text_field_labels"]
+        return self.query_context(question)
+
+    def get_date_field_labels(self):
+        question = self.queries["date_field_labels"]
+        return self.query_context(question)
+    
+    def get_integer_field_labels(self):
+        question = self.queries["integer_field_labels"]
+        return self.query_context(question)
+
+    def get_enum_field_labels(self):
+        question = self.queries["enum_field_labels"]
+        return self.query_context(question)
+
+    def get_boolean_field_labels(self):
+        question = self.queries["boolean_field_labels"]
+        return self.query_context(question)
+    
     def get_number_of_fields(self):
-        question = "How many string fields are there in this request?"
+        question = self.queries["number_of_fields"]
+        return self.query_context(question)
+    
+    def get_component_type(self):
+        question = self.queries["component_type"]
         return self.query_context(question)
 
-    def get_type_of_component(self):
-        question = "What kind of component do they want?"
+    def get_all_labels(self):
+        question = self.queries["all_labels"]
         return self.query_context(question)
 
-    def get_field_labels(self):
-        question = "List the labels for each of fields in the prompt?"
-        return self.query_context(question)
-
-    def get_field_layout(self):
-        question = "How do they want the form laid out? Vertically or Horizontally?"
+    def get_orientation(self):
+        question = self.queries["orientation"]
         return self.query_context(question)
     
     def get_str_ele(self):
-        return StrEle(type="string", minLength=1)
-
-    def get_orientation(self, layout):
-        if layout == "vertical":
-            return "VerticalLayout"
-        else: 
-            return "HorizontalLayout"
+        return StringField(type="string", minLength=1)

@@ -5,13 +5,20 @@
             "type": "string",
             "minLength": 1
         },
-        "email": {
-            "type": "string",
-            "minLength": 1
-        },
         "password": {
             "type": "string",
             "minLength": 1
+        },
+        "confirmpassword": {
+            "type": "string",
+            "minLength": 1
+        },
+        "dateofbirth": {
+            "type": "string",
+            "format": "date"
+        },
+        "accept": {
+            "type": "boolean"
         }
     }
 }

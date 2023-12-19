@@ -8,13 +8,18 @@
         },
         {
             "type": "Control",
-            "scope": "#/properties/email",
-            "label": "Email"
+            "scope": "#/properties/password",
+            "label": "Password"
         },
         {
             "type": "Control",
-            "scope": "#/properties/password",
-            "label": "Password"
+            "scope": "#/properties/confirmpassword",
+            "label": "ConfirmPassword"
+        },
+        {
+            "type": "Control",
+            "scope": "#/properties/dateofbirth",
+            "label": "DateofBirth"
         }
     ]
 }
