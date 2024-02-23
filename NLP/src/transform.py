@@ -8,9 +8,9 @@ from Extractive import Extractive
 from rich import print
 
 class transform:
-    schema_path     = "./jsonforms-react-seed/src/schema.json"
-    ui_schema_path  = "./jsonforms-react-seed/src/uischema.json"
-    questions_path  = "./NLP/src/questions/questions.json"
+    schema_path     = "../jsonforms-react-seed/src/schema.json"
+    ui_schema_path  = "../jsonforms-react-seed/src/uischema.json"
+    questions_path  = "./src/questions/questions.json"
     # context         = "Create me a form component with four text fields, with labels of Username and Confirm Password and Password and Email Address. Arrange them in a vertical layout."
     # context         = "Create a form with three text fields labelled Username, Confirm Password and Password and a date field with the label Due Date. Arrange them in a vertical layout."
     properties      = {}
@@ -40,7 +40,7 @@ class transform:
         layoutObj.type  = self.get_orientation(orientation)
 
         elements = []
-        all_labels = labels.string_labels + labels.date_labels
+        all_labels = labels.string_labels + labels.date_labels + labels.boolean_labels
         for _, value in enumerate(all_labels):
             label       = f"{value}" 
             ele         = Ele(label=value, type="Control", scope="#/properties/" + label.lower())
@@ -109,6 +109,7 @@ class transform:
             enum_labels=[],
             boolean_labels=boolean_labels
             )
+        print(labels)
         orientation        = self.extractive.get_orientation()
 
         # print(labels)

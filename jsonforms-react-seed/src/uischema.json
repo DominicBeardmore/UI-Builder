@@ -20,6 +20,11 @@
             "type": "Control",
             "scope": "#/properties/dateofbirth",
             "label": "DateofBirth"
+        },
+        {
+            "type": "Control",
+            "scope": "#/properties/accept",
+            "label": "Accept"
         }
     ]
 }
