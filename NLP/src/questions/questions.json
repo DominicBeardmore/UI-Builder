@@ -8,7 +8,8 @@
         "component_type": "What kind of component do they want?",
         "all_labels": "What are the labels for all the text and date fields?",
         "number_of_fields": "How many text and date fields are in this prompt?",
-        "orientation": "How do they want the form laid out? Vertically or Horizontally?"
+        "orientation": "How do they want the form laid out? Vertically or Horizontally?",
+        "switch_fields": "Which two fields does the user want to switch?"
     },
     "abstractive": {
         
